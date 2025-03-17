@@ -63,6 +63,23 @@ def inference(args, device):
             else:
                 sf.write(output_file, audio_g.squeeze().cpu().numpy(), sampling_rate, 'PCM_16')
 
+def show_model(args, device):
+    cfg = load_config(args.config)
+    n_fft, hop_size, win_size = cfg['stft_cfg']['n_fft'], cfg['stft_cfg']['hop_size'], cfg['stft_cfg']['win_size']
+    compress_factor = cfg['model_cfg']['compress_factor']
+    sampling_rate = cfg['stft_cfg']['sampling_rate']
+
+    model = SEMamba(cfg).to(device)
+    state_dict = torch.load(args.checkpoint_file, map_location=device)
+    model.load_state_dict(state_dict['generator'])
+
+    model.eval()
+    # 找到並顯示第一層參數
+    print("First layer parameters:")
+    for name, param in model.named_parameters():
+        print(f"Parameter: {name}, Shape: {param.shape}, Type: {param.dtype}")
+        # print(f"Values:\n{param.data}\n")
+        # break  # 只顯示第一層，然後跳出迴圈
 
 def main():
     print('Initializing Inference Process..')
@@ -82,7 +99,8 @@ def main():
         raise RuntimeError("Currently, CPU mode is not supported.")
         
 
-    inference(args, device)
+    # inference(args, device)
+    show_model(args, device)
 
 
 if __name__ == '__main__':
