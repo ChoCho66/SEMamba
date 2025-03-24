@@ -29,20 +29,21 @@ def main():
 
     args = parser.parse_args()
 
-    prefix = args.prefix_path if (args.prefix_path is not None) else "/mnt/e/Corpora/noisy_vctk/"
+    # prefix = args.prefix_path if (args.prefix_path is not None) else "/mnt/e/Corpora/noisy_vctk/"
+    prefix = "/disk4/chocho/_datas/VCTK_DEMAND16k"
 
 
     ## You can manualy modify the clean and noisy path
     # ----------------------------------------------------------#
     ## train_clean
     make_json(
-        os.path.join(prefix, 'clean_trainset_28spk_wav_16k/'),
+        os.path.join(prefix, 'train/clean'),
         'data/train_clean.json'
     )
 
     ## train_noisy
     make_json(
-        os.path.join(prefix, 'noisy_trainset_28spk_wav_16k/'),
+        os.path.join(prefix, 'train/noisy'),
         'data/train_noisy.json'
     )
     # ----------------------------------------------------------#
@@ -51,13 +52,13 @@ def main():
     # create valid set json
     ## valid_clean
     make_json(
-         os.path.join(prefix, 'clean_testset_wav_16k/'),
+         os.path.join(prefix, 'test/clean'),
         'data/valid_clean.json'
     )
 
     ## valid_noisy
     make_json(
-        os.path.join(prefix, 'noisy_testset_wav_16k/'),
+        os.path.join(prefix, 'test/noisy'),
         'data/valid_noisy.json'
     )
     # ----------------------------------------------------------#
@@ -65,16 +66,16 @@ def main():
     # ----------------------------------------------------------#
     # create testing set json
     ## test_clean
-    make_json(
-       os.path.join(prefix, 'clean_testset_wav_16k/'),
-        'data/test_clean.json'
-    )
+    # make_json(
+    #    os.path.join(prefix, 'clean_testset_wav_16k/'),
+    #     'data/test_clean.json'
+    # )
 
-    ## test_noisy
-    make_json(
-       os.path.join(prefix, 'noisy_testset_wav_16k/'),
-        'data/test_noisy.json'
-    )
+    # ## test_noisy
+    # make_json(
+    #    os.path.join(prefix, 'noisy_testset_wav_16k/'),
+    #     'data/test_noisy.json'
+    # )
     # ----------------------------------------------------------#
 
 

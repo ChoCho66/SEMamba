@@ -59,9 +59,11 @@ def inference(args, device):
 
             if args.post_processing_PCS == True:
                 audio_g = cal_pcs(audio_g.squeeze().cpu().numpy())
-                sf.write(output_file, audio_g, sampling_rate, 'PCM_16')
+                # sf.write(output_file, audio_g, sampling_rate, 'PCM_16')
+                sf.write(output_file, audio_g, sampling_rate, subtype='FLOAT')
             else:
-                sf.write(output_file, audio_g.squeeze().cpu().numpy(), sampling_rate, 'PCM_16')
+                # sf.write(output_file, audio_g.squeeze().cpu().numpy(), sampling_rate, 'PCM_16')
+                sf.write(output_file, audio_g.squeeze().cpu().numpy(), sampling_rate, subtype='FLOAT')
 
 def show_model(args, device):
     cfg = load_config(args.config)
@@ -87,7 +89,8 @@ def main():
     parser.add_argument('--input_folder', default='/mnt/e/Corpora/noisy_vctk/noisy_testset_wav_16k/')
     parser.add_argument('--output_folder', default='results')
     parser.add_argument('--config', default='results')
-    parser.add_argument('--checkpoint_file', required=True)
+    # parser.add_argument('--checkpoint_file', required=True)
+    parser.add_argument('--checkpoint_file', default='/disk4/chocho/SEMamba/ckpts/SEMamba_advanced.pth')
     parser.add_argument('--post_processing_PCS', default=False)
     args = parser.parse_args()
 
@@ -99,8 +102,8 @@ def main():
         raise RuntimeError("Currently, CPU mode is not supported.")
         
 
-    # inference(args, device)
-    show_model(args, device)
+    inference(args, device)
+    # show_model(args, device)
 
 
 if __name__ == '__main__':
