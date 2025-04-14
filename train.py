@@ -24,6 +24,8 @@ from utils.util import (
     print_gpu_info, log_model_info, initialize_process_group,
 )
 
+from c66 import pp, pps
+
 torch.backends.cudnn.benchmark = True
 
 def setup_optimizers(models, cfg):
@@ -134,6 +136,7 @@ def train(rank, args, cfg):
         validation_loader = create_dataloader(validset, cfg, train=False)
         sw = SummaryWriter(os.path.join(args.exp_path, 'logs'))
 
+    # Training
     generator.train()
     discriminator.train()
 
@@ -158,9 +161,14 @@ def train(rank, args, cfg):
             mag_g, pha_g, com_g = generator(noisy_mag, noisy_pha)
 
             audio_g = mag_phase_istft(mag_g, pha_g, n_fft, hop_size, win_size, compress_factor)
+            
+            pps(clean_audio, audio_g)
+            print(no)
+            
             audio_list_r, audio_list_g = list(clean_audio.cpu().numpy()), list(audio_g.detach().cpu().numpy())
             batch_pesq_score = batch_pesq(audio_list_r, audio_list_g, cfg)
 
+            # Discriminator and Generator
             # Discriminator
             # ------------------------------------------------------- #
             optim_d.zero_grad()

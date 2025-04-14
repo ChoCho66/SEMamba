@@ -15,6 +15,9 @@ from utils.util import (
     print_gpu_info, log_model_info, initialize_process_group,
 )
 
+from torchinfo import summary
+import torch.nn as nn
+
 h = None
 device = None
 
@@ -76,12 +79,44 @@ def show_model(args, device):
     model.load_state_dict(state_dict['generator'])
 
     model.eval()
-    # 找到並顯示第一層參數
-    print("First layer parameters:")
-    for name, param in model.named_parameters():
-        print(f"Parameter: {name}, Shape: {param.shape}, Type: {param.dtype}")
-        # print(f"Values:\n{param.data}\n")
-        # break  # 只顯示第一層，然後跳出迴圈
+    
+    with torch.no_grad():
+        for i, fname in enumerate(os.listdir( args.input_folder )):
+            print(fname, args.input_folder)
+            noisy_wav, _ = librosa.load(os.path.join( args.input_folder, fname ), sr=sampling_rate)
+            noisy_wav = torch.FloatTensor(noisy_wav).to(device)
+            print(noisy_wav.shape)
+
+            norm_factor = torch.sqrt(len(noisy_wav) / torch.sum(noisy_wav ** 2.0)).to(device)
+            noisy_wav = (noisy_wav * norm_factor).unsqueeze(0)
+            noisy_amp, noisy_pha, noisy_com = mag_phase_stft(noisy_wav, n_fft, hop_size, win_size, compress_factor)
+            print()
+            print()
+            print()
+            print()
+            print(noisy_amp.shape, noisy_pha.shape)
+            # 獲取完整 summary
+            summary_str = summary(model, input_size=[(1, 201, 286), (1, 201, 286)], depth=5, col_names=("input_size", "output_size", "num_params"), verbose=0)
+            # 將輸出寫入 txt
+            with open("model_summary.txt", "w") as f:
+                f.write(str(summary_str))
+            print()
+            print()
+            print()
+            print()
+            amp_g, pha_g, com_g = model(noisy_amp, noisy_pha)
+            print(amp_g.shape, pha_g.shape)
+            audio_g = mag_phase_istft(amp_g, pha_g, n_fft, hop_size, win_size, compress_factor)
+            audio_g = audio_g / norm_factor
+            print(audio_g.shape)
+            break
+    
+    # # 找到並顯示第一層參數
+    # print("First layer parameters:")
+    # for name, param in model.named_parameters():
+    #     print(f"Parameter: {name}, Shape: {param.shape}, Type: {param.dtype}")
+    #     # print(f"Values:\n{param.data}\n")
+    #     # break  # 只顯示第一層，然後跳出迴圈
 
 def main():
     print('Initializing Inference Process..')

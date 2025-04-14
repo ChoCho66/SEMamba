@@ -2,6 +2,7 @@
 __pycache__
 
 .*
-_results-SEMamba
+_results*
+_test*
 
 exp*

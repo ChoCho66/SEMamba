@@ -46,8 +46,8 @@ class SEMamba(nn.Module):
         - denoised_com (torch.Tensor): Denoised complex tensor [B, F, T, 2].
         """
         # Reshape inputs
-        noisy_mag = rearrange(noisy_mag, 'b f t -> b t f').unsqueeze(1)  # [B, 1, T, F]
-        noisy_pha = rearrange(noisy_pha, 'b f t -> b t f').unsqueeze(1)  # [B, 1, T, F]
+        noisy_mag = rearrange(noisy_mag, 'b f t -> b t f').unsqueeze(1)  # [B F T] -> [B, 1, T, F]
+        noisy_pha = rearrange(noisy_pha, 'b f t -> b t f').unsqueeze(1)  # [B F T] -> [B, 1, T, F]
 
         # Concatenate magnitude and phase inputs
         x = torch.cat((noisy_mag, noisy_pha), dim=1)  # [B, 2, T, F]
