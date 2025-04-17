@@ -134,7 +134,7 @@ def inference_chunk(args, device, chunk_sec=0.25):
                 sf.write(output_file1, noisy_wav.squeeze().cpu().numpy(), sampling_rate, subtype='FLOAT')
 
 
-def inference_chunk(args, device, chunk_sec=0.25):
+def inference_chunk_combine(args, device, chunk_sec=0.3):
     cfg = load_config(args.config)
     n_fft, hop_size, win_size = cfg['stft_cfg']['n_fft'], cfg['stft_cfg']['hop_size'], cfg['stft_cfg']['win_size']
     compress_factor = cfg['model_cfg']['compress_factor']
@@ -148,17 +148,12 @@ def inference_chunk(args, device, chunk_sec=0.25):
 
     model.eval()
 
-    chunk_frame = int(chunk_sec * 16000)
     # 1:16000 = x:chunk_frame
+    chunk_frame = int(chunk_sec * 16000)
     with torch.no_grad():
         for i, fname in enumerate(os.listdir( args.input_folder )):
             print(fname, args.input_folder)
             noisy_wav, _ = librosa.load(os.path.join( args.input_folder, fname ), sr=sampling_rate)
-            _start = random.randint(1000, len(noisy_wav) - chunk_frame)
-            noisy_wav = noisy_wav[_start:]
-            noisy_wav = noisy_wav[:chunk_frame]
-            pps(noisy_wav)
-            
             noisy_wav = torch.FloatTensor(noisy_wav).to(device)
 
             norm_factor = torch.sqrt(len(noisy_wav) / torch.sum(noisy_wav ** 2.0)).to(device)
@@ -172,8 +167,6 @@ def inference_chunk(args, device, chunk_sec=0.25):
             output_file = os.path.join(args.output_folder, fname)
             fname1 = fname.split("wav")[0] + "1.wav"
             output_file1 = os.path.join(args.output_folder, fname1)
-
-            pps(audio_g, noisy_wav)
 
             if args.post_processing_PCS == True:
                 audio_g = cal_pcs(audio_g.squeeze().cpu().numpy())
