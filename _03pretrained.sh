@@ -1,3 +1,6 @@
+conda activate /disk4/chocho/speechbrain/.speechbrain
+cd /disk4/chocho/SEMamba
+
 taskset -c 46-47 nice -n 46 python inference.py \
    --input_folder /disk4/chocho/_datas/VCTK_DEMAND16k/test/noisy \
    --output_folder _results-SEMamba \

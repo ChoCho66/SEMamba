@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 
-def mag_phase_stft(y, n_fft, hop_size, win_size, compress_factor=1.0, center=True, addeps=False):
+# def mag_phase_stft(y, n_fft, hop_size, win_size, compress_factor=1.0, center=True, addeps=False):
+def mag_phase_stft(y, n_fft=400, hop_size=100, win_size=400, compress_factor=1.0, center=True, addeps=False):
     """
     Compute magnitude and phase using STFT.
 
@@ -44,7 +45,7 @@ def mag_phase_stft(y, n_fft, hop_size, win_size, compress_factor=1.0, center=Tru
     return mag, pha, com
 
 
-def mag_phase_istft(mag, pha, n_fft, hop_size, win_size, compress_factor=1.0, center=True):
+def mag_phase_istft(mag, pha, n_fft=400, hop_size=100, win_size=400, compress_factor=1.0, center=True):
     """
     Inverse STFT to reconstruct the audio signal from magnitude and phase.
 
