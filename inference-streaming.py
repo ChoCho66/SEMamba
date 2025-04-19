@@ -36,13 +36,20 @@ device = None
 # 0.3 OK
 
 import numpy as np
+import random
+import shutil
 
-# chunk_hop_size = chunk_frame // 2  
+# chunk_hop_ratio=0.5
 # chunk_sec 
 # 0.4 OK 
 # 0.3 OK
+# chunk_hop_ratio=0.2
+# chunk_sec 0.3 OK
+# chunk_sec 0.2 有點吱吱聲
 # 有點崩潰
-def inference_chunk_combine(args, device, chunk_sec=0.2):
+def inference_chunk_combine(args, device):
+    chunk_sec = args.chunk_sec
+    chunk_hop_ratio = args.chunk_hop_ratio
     cfg = load_config(args.config)
     n_fft, hop_size, win_size = cfg['stft_cfg']['n_fft'], cfg['stft_cfg']['hop_size'], cfg['stft_cfg']['win_size']
     compress_factor = cfg['model_cfg']['compress_factor']
@@ -52,6 +59,9 @@ def inference_chunk_combine(args, device, chunk_sec=0.2):
     state_dict = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(state_dict['generator'])
 
+    # 先清空資料夾
+    if os.path.exists(args.output_folder):
+        shutil.rmtree(args.output_folder)
     os.makedirs(args.output_folder, exist_ok=True)
 
     model.eval()
@@ -79,8 +89,13 @@ def inference_chunk_combine(args, device, chunk_sec=0.2):
             start_positions.append(max(0, total_length - chunk_frame))
         
         for start in start_positions:
+            
             # 提取 chunk
             end = min(start + chunk_frame, total_length)
+            
+            # start 是每隔 chunk_hop_size 會取一個
+            # end - start 理論上會是 chunk_frame
+            
             chunk = noisy_wav_tensor[start:end]
             
             # 如果 chunk 長度不足 chunk_frame，填充到 chunk_frame
@@ -132,10 +147,11 @@ def inference_chunk_combine(args, device, chunk_sec=0.2):
 
     # 主處理迴圈
     chunk_frame = int(chunk_sec * 16000)
-    chunk_hop_size = chunk_frame // 2  # 預設 hop size 為 chunk_frame 的一半，確保 50% 重疊
+    chunk_hop_size = int(chunk_frame * chunk_hop_ratio)  # 預設 hop size 為 chunk_frame 的一半，確保 50% 重疊
+    file_list = os.listdir(args.input_folder)
+    sampled_files = random.sample(file_list, int(len(file_list) * args.num_sampled_ratio))
     with torch.no_grad():
-        for i, fname in enumerate(os.listdir(args.input_folder)[:100]):
-            print(fname, args.input_folder)
+        for i, fname in enumerate(sampled_files):
             
             # 載入音訊
             noisy_wav, _ = librosa.load(os.path.join(args.input_folder, fname), sr=sampling_rate)
@@ -144,7 +160,7 @@ def inference_chunk_combine(args, device, chunk_sec=0.2):
             if chunk_frame < win_size:
                 print(f"Warning: chunk_frame ({chunk_frame}) is smaller than win_size ({win_size}). Adjusting chunk_frame.")
                 chunk_frame = win_size
-                chunk_hop_size = chunk_frame // 2
+                chunk_hop_size = int(chunk_frame * chunk_hop_ratio)
             
             # 處理音訊（分塊）
             try:
@@ -158,12 +174,8 @@ def inference_chunk_combine(args, device, chunk_sec=0.2):
             
             # 準備輸出檔案
             output_file = os.path.join(args.output_folder, fname)
-            fname1 = fname.split("wav")[0] + "1.wav"
-            output_file1 = os.path.join(args.output_folder, fname1)
-            
             # 儲存處理後的音訊和原始音訊
             sf.write(output_file, processed_audio, sampling_rate, subtype='FLOAT')
-            sf.write(output_file1, noisy_wav, sampling_rate, subtype='FLOAT')
             
 def main():
     print('Initializing Inference Process..')
@@ -174,6 +186,10 @@ def main():
     # parser.add_argument('--checkpoint_file', required=True)
     parser.add_argument('--checkpoint_file', default='/disk4/chocho/SEMamba/ckpts/SEMamba_advanced.pth')
     parser.add_argument('--post_processing_PCS', default=False)
+    parser.add_argument("--chunk_sec", type=float, default=0.2, help="Chunk duration in seconds")
+    parser.add_argument("--chunk_hop_ratio", type=float, default=0.7, help="Hop ratio between chunks")
+    parser.add_argument("--num_sampled_ratio", type=float, default=0.5, help="Sampling ratio for chunks")
+
     args = parser.parse_args()
 
     global device

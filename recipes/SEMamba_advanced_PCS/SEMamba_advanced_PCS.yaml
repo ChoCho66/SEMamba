@@ -57,11 +57,11 @@ stft_cfg:
 # Model Configuration
 # Defines the architecture specifics of the model, including layer configurations and feature compression.
 model_cfg:
-  # hid_feature: 64  # Channels in dense layers.
-  hid_feature: 32  # Channels in dense layers.
+  hid_feature: 64  # Channels in dense layers.
+  # hid_feature: 32  # Channels in dense layers.
   compress_factor: 0.3  # Compression factor applied to extracted features.
-  # num_tfmamba: 4  # Number of Time-Frequency Mamba (TFMamba) blocks in the model.
-  num_tfmamba: 2  # Number of Time-Frequency Mamba (TFMamba) blocks in the model.
+  num_tfmamba: 4  # Number of Time-Frequency Mamba (TFMamba) blocks in the model.
+  # num_tfmamba: 2  # Number of Time-Frequency Mamba (TFMamba) blocks in the model.
   d_state: 16  # Dimensionality of the state vector in Mamba blocks.
   d_conv: 4  # Convolutional layer dimensionality within Mamba blocks.
   expand: 4  # Expansion factor for the layers within the Mamba blocks.

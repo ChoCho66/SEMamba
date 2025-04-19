@@ -1,0 +1,5 @@
+        Name  CPU Mem  Self CPU Mem   CUDA Mem  Self CUDA Mem  Total KFLOPs
+aten::conv2d        0             0  461935104              0     280640002
+    aten::mm        0             0 5235965952     5235965952     178841190
+   aten::add        0             0  578150400      578150400        144537
+   aten::mul       80            56    3783680        3783680           756

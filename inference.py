@@ -69,18 +69,95 @@ def inference(args, device):
                 # sf.write(output_file, audio_g.squeeze().cpu().numpy(), sampling_rate, 'PCM_16')
                 sf.write(output_file, audio_g.squeeze().cpu().numpy(), sampling_rate, subtype='FLOAT')
 
-# chunk_frame=3500  _start = 65000  崩潰
-# 聽感
-# chunk_frame 
-# 36000 OK
-# 26000 OK
-# 16000 OK
-# 9000 OK
-# 6000 OK
-# 5500 OK
-# 5000 ?
-# chunk_sec
-# 0.3 OK
+def inference_feature_map(args, device):
+    cfg = load_config(args.config)
+    n_fft, hop_size, win_size = cfg['stft_cfg']['n_fft'], cfg['stft_cfg']['hop_size'], cfg['stft_cfg']['win_size']
+    compress_factor = cfg['model_cfg']['compress_factor']
+    sampling_rate = cfg['stft_cfg']['sampling_rate']
+
+    model = SEMamba(cfg).to(device)
+    state_dict = torch.load(args.checkpoint_file, map_location=device)
+    model.load_state_dict(state_dict['generator'])
+
+    os.makedirs(args.output_folder, exist_ok=True)
+
+    model.eval()
+
+    with torch.no_grad():
+        for i, fname in enumerate(os.listdir( args.input_folder )):
+            print(fname, args.input_folder)
+            noisy_wav, _ = librosa.load(os.path.join( args.input_folder, fname ), sr=sampling_rate)
+            noisy_wav = torch.FloatTensor(noisy_wav).to(device)
+            norm_factor = torch.sqrt(len(noisy_wav) / torch.sum(noisy_wav ** 2.0)).to(device)
+            noisy_wav = (noisy_wav * norm_factor).unsqueeze(0)
+            noisy_amp, noisy_pha, noisy_com = mag_phase_stft(noisy_wav, n_fft, hop_size, win_size, compress_factor)
+            model.get_feature_map(fname, noisy_amp, noisy_pha)
+            
+
+def inference_FlopCountAnalysis(args, device):
+    from torch.profiler import profile, record_function, ProfilerActivity
+    cfg = load_config(args.config)
+    n_fft, hop_size, win_size = cfg['stft_cfg']['n_fft'], cfg['stft_cfg']['hop_size'], cfg['stft_cfg']['win_size']
+    compress_factor = cfg['model_cfg']['compress_factor']
+    sampling_rate = cfg['stft_cfg']['sampling_rate']
+
+    model = SEMamba(cfg).to(device)
+    state_dict = torch.load(args.checkpoint_file, map_location=device)
+    model.load_state_dict(state_dict['generator'])
+    model.eval()
+
+    import pandas as pd
+    with torch.no_grad():
+        for i, fname in enumerate(os.listdir( args.input_folder )):
+            print(fname, args.input_folder)
+            noisy_wav, _ = librosa.load(os.path.join( args.input_folder, fname ), sr=sampling_rate)
+            noisy_wav = torch.FloatTensor(noisy_wav).to(device)
+            norm_factor = torch.sqrt(len(noisy_wav) / torch.sum(noisy_wav ** 2.0)).to(device)
+            noisy_wav = (noisy_wav * norm_factor).unsqueeze(0)
+            noisy_amp, noisy_pha, noisy_com = mag_phase_stft(noisy_wav, n_fft, hop_size, win_size, compress_factor)
+
+            # 使用 profiler 追蹤 FLOPs
+            with profile(
+                activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+                record_shapes=True,
+                profile_memory=True,
+                with_flops=True  # 啟用 FLOPs 計算
+            ) as prof:
+                with record_function("model_inference"):
+                    output = model(noisy_amp, noisy_pha)
+            # 輸出 FLOPs 結果
+            # print(prof.key_averages().table(sort_by="flops", row_limit=10))
+            events = prof.key_averages()
+            # 把想要的欄位整理出來
+            rows = []
+            for evt in events:
+                rows.append({
+                    "Name": evt.key,
+                    "CPU Mem": evt.cpu_memory_usage,              # 單位: bytes
+                    "Self CPU Mem": evt.self_cpu_memory_usage,
+                    "CUDA Mem": evt.cuda_memory_usage,
+                    "Self CUDA Mem": evt.self_cuda_memory_usage,
+                    "Total KFLOPs": int(evt.flops / 1e3) if evt.flops else 0  # 轉為整數避免科學記號
+                })
+            # 轉為 DataFrame，依 flops 排序
+            df = pd.DataFrame(rows)
+            df_sorted = df.sort_values(by="Total KFLOPs", ascending=False).head(10)
+            # 顯示結果
+            print(df_sorted.to_string(index=False))            
+
+            # # 計算 FLOPs 和參數量
+            # flops, params = get_model_complexity_info(
+            #     model,
+            #     input_res,
+            #     as_strings=True,
+            #     print_per_layer_stat=True,
+            #     verbose=True
+            # )
+            # # 輸出結果
+            # print(f"計算複雜度: {flops}")
+            # print(f"參數量: {params}")
+            break
+
 import random
 def inference_chunk(args, device, chunk_sec=0.25):
     cfg = load_config(args.config)
@@ -259,10 +336,11 @@ def main():
     else:
         #device = torch.device('cpu')
         raise RuntimeError("Currently, CPU mode is not supported.")
-        
 
     # inference(args, device)
-    inference_chunk(args, device)
+    # inference_feature_map(args, device)
+    inference_FlopCountAnalysis(args, device)
+    # inference_chunk(args, device)
     # show_model(args, device)
     # show_model2(args, device)
 
