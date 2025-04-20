@@ -29,37 +29,21 @@ def main():
 
     args = parser.parse_args()
 
-<<<<<<< Updated upstream
-    # prefix = args.prefix_path if (args.prefix_path is not None) else "/mnt/e/Corpora/noisy_vctk/"
-    prefix = "/disk4/chocho/_datas/VCTK_DEMAND16k"
+    prefix = args.prefix_path if (args.prefix_path is not None) else "/mnt/e/Corpora/noisy_vctk/"
 
-=======
-    # prefix = args.prefix_path if (args.prefix_path is not None) else "/home/kycho/Speech-Enhancement-Code/datas/VCTK-Valentini-Botinhao-2016-16k-1"
-    prefix = "/home/kycho/Speech-Enhancement-Code/datas/VCTK-Valentini-Botinhao-2016-16k-1"
->>>>>>> Stashed changes
 
     ## You can manualy modify the clean and noisy path
     # ----------------------------------------------------------#
     ## train_clean
     make_json(
-<<<<<<< Updated upstream
-        os.path.join(prefix, 'train/clean'),
+        os.path.join(prefix, 'clean_trainset_28spk_wav_16k/'),
         'data/train_clean.json'
-=======
-        os.path.join(prefix, 'clean_train'),
-        'train_clean.json'
->>>>>>> Stashed changes
     )
 
     ## train_noisy
     make_json(
-<<<<<<< Updated upstream
-        os.path.join(prefix, 'train/noisy'),
+        os.path.join(prefix, 'noisy_trainset_28spk_wav_16k/'),
         'data/train_noisy.json'
-=======
-        os.path.join(prefix, 'noisy_train/'),
-        'train_noisy.json'
->>>>>>> Stashed changes
     )
     # ----------------------------------------------------------#
 
@@ -67,40 +51,30 @@ def main():
     # create valid set json
     ## valid_clean
     make_json(
-<<<<<<< Updated upstream
-         os.path.join(prefix, 'test/clean'),
+         os.path.join(prefix, 'clean_testset_wav_16k/'),
         'data/valid_clean.json'
-=======
-         os.path.join(prefix, 'clean_test/'),
-        'valid_clean.json'
->>>>>>> Stashed changes
     )
 
     ## valid_noisy
     make_json(
-<<<<<<< Updated upstream
-        os.path.join(prefix, 'test/noisy'),
+        os.path.join(prefix, 'noisy_testset_wav_16k/'),
         'data/valid_noisy.json'
-=======
-        os.path.join(prefix, 'noisy_test/'),
-        'valid_noisy.json'
->>>>>>> Stashed changes
     )
     # ----------------------------------------------------------#
 
     # ----------------------------------------------------------#
     # create testing set json
     ## test_clean
-    # make_json(
-    #    os.path.join(prefix, 'clean_testset_wav_16k/'),
-    #     'data/test_clean.json'
-    # )
+    make_json(
+       os.path.join(prefix, 'clean_testset_wav_16k/'),
+        'data/test_clean.json'
+    )
 
-    # ## test_noisy
-    # make_json(
-    #    os.path.join(prefix, 'noisy_testset_wav_16k/'),
-    #     'data/test_noisy.json'
-    # )
+    ## test_noisy
+    make_json(
+       os.path.join(prefix, 'noisy_testset_wav_16k/'),
+        'data/test_noisy.json'
+    )
     # ----------------------------------------------------------#
 
 

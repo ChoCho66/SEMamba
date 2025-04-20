@@ -2,19 +2,11 @@
 # These settings specify the hardware and distributed setup for the model training.
 # Adjust `num_gpus` and `dist_config` according to your distributed training environment.
 env_setting:
-<<<<<<< Updated upstream
   num_gpus: 2  # Number of GPUs. Now we don't support CPU mode. 
-  # num_workers: 20  # Number of worker threads for data loading.
-  num_workers: 2  # Number of worker threads for data loading.
-=======
-  # num_gpus: 2  # Number of GPUs. Now we don't support CPU mode. 
-  num_gpus: 1  # Number of GPUs. Now we don't support CPU mode. 
   num_workers: 20  # Number of worker threads for data loading.
->>>>>>> Stashed changes
   seed: 1234  # Seed for random number generators to ensure reproducibility.
   stdout_interval: 10
-  # checkpoint_interval: 1000  # save model to ckpt every N steps
-  checkpoint_interval: 10  # save model to ckpt every N steps
+  checkpoint_interval: 1000  # save model to ckpt every N steps
   validation_interval: 1000
   summary_interval: 100
   dist_cfg:
@@ -28,17 +20,15 @@ data_cfg:
   train_noisy_json: data/train_noisy.json
   valid_clean_json: data/valid_clean.json
   valid_noisy_json: data/valid_noisy.json
-  # test_clean_json: data/test_clean.json
-  # test_noisy_json: data/test_noisy.json
+  test_clean_json: data/test_clean.json
+  test_noisy_json: data/test_noisy.json
 
 # Training Configuration
 # This section details parameters that directly influence the training process,
 # including batch sizes, learning rates, and optimizer specifics.
 training_cfg:
-  # training_epochs: 200 # Training epoch.
-  training_epochs: 10 # Training epoch.
+  training_epochs: 200 # Training epoch.
   batch_size: 4  # Training batch size.
-  # batch_size: 4 已經吃了 97% 顯存
   learning_rate: 0.0005  # Initial learning rate.
   adam_b1: 0.8  # Beta1 hyperparameter for the AdamW optimizer.
   adam_b2: 0.99  # Beta2 hyperparameter for the AdamW optimizer.
