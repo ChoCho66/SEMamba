@@ -106,56 +106,36 @@ def inference_FlopCountAnalysis(args, device):
     model.load_state_dict(state_dict['generator'])
     model.eval()
 
-    import pandas as pd
+    from calflops import calculate_flops
     with torch.no_grad():
-        for i, fname in enumerate(os.listdir( args.input_folder )):
+        for i, fname in enumerate(os.listdir(args.input_folder)):
             print(fname, args.input_folder)
-            noisy_wav, _ = librosa.load(os.path.join( args.input_folder, fname ), sr=sampling_rate)
+            # 載入音訊檔案
+            noisy_wav, _ = librosa.load(os.path.join(args.input_folder, fname), sr=sampling_rate)
             noisy_wav = torch.FloatTensor(noisy_wav).to(device)
+            # 正規化
             norm_factor = torch.sqrt(len(noisy_wav) / torch.sum(noisy_wav ** 2.0)).to(device)
             noisy_wav = (noisy_wav * norm_factor).unsqueeze(0)
+            # 計算 STFT 的幅度和相位
             noisy_amp, noisy_pha, noisy_com = mag_phase_stft(noisy_wav, n_fft, hop_size, win_size, compress_factor)
 
-            # 使用 profiler 追蹤 FLOPs
-            with profile(
-                activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                record_shapes=True,
-                profile_memory=True,
-                with_flops=True  # 啟用 FLOPs 計算
-            ) as prof:
-                with record_function("model_inference"):
-                    output = model(noisy_amp, noisy_pha)
-            # 輸出 FLOPs 結果
-            # print(prof.key_averages().table(sort_by="flops", row_limit=10))
-            events = prof.key_averages()
-            # 把想要的欄位整理出來
-            rows = []
-            for evt in events:
-                rows.append({
-                    "Name": evt.key,
-                    "CPU Mem": evt.cpu_memory_usage,              # 單位: bytes
-                    "Self CPU Mem": evt.self_cpu_memory_usage,
-                    "CUDA Mem": evt.cuda_memory_usage,
-                    "Self CUDA Mem": evt.self_cuda_memory_usage,
-                    "Total KFLOPs": int(evt.flops / 1e3) if evt.flops else 0  # 轉為整數避免科學記號
-                })
-            # 轉為 DataFrame，依 flops 排序
-            df = pd.DataFrame(rows)
-            df_sorted = df.sort_values(by="Total KFLOPs", ascending=False).head(10)
-            # 顯示結果
-            print(df_sorted.to_string(index=False))            
+            # 確保模型和輸入在同一設備
+            model = model.to(device)
+            noisy_amp = noisy_amp.to(device)
+            noisy_pha = noisy_pha.to(device)
 
-            # # 計算 FLOPs 和參數量
-            # flops, params = get_model_complexity_info(
-            #     model,
-            #     input_res,
-            #     as_strings=True,
-            #     print_per_layer_stat=True,
-            #     verbose=True
-            # )
-            # # 輸出結果
-            # print(f"計算複雜度: {flops}")
-            # print(f"參數量: {params}")
+            # 使用 calflops 計算 FLOPs，將 args 改為列表
+            flops, macs, params = calculate_flops(
+                model=model,
+                args=[noisy_amp, noisy_pha],  # 使用列表而非元組
+                print_results=True  # 顯示逐層結果
+            )
+            # print(f"Total FLOPs for {fname}: {flops / 1e9:.3f} GFLOPs")
+            # print(f"Total Params: {params / 1e6:.3f} M")
+            # print(f"Total MACs: {macs / 1e9:.3f} GMACs")
+            print(f"Total FLOPs for {fname}: {flops}")
+            print(f"Total Params: {params}")
+            print(f"Total MACs: {macs}")
             break
 
 import random
@@ -292,11 +272,11 @@ def show_model(args, device):
             print()
             print()
             print()
-            amp_g, pha_g, com_g = model(noisy_amp, noisy_pha)
-            pp(amp_g.shape, pha_g.shape)
-            audio_g = mag_phase_istft(amp_g, pha_g, n_fft, hop_size, win_size, compress_factor)
-            audio_g = audio_g / norm_factor
-            pp(audio_g.shape)
+            # amp_g, pha_g, com_g = model(noisy_amp, noisy_pha)
+            # pp(amp_g.shape, pha_g.shape)
+            # audio_g = mag_phase_istft(amp_g, pha_g, n_fft, hop_size, win_size, compress_factor)
+            # audio_g = audio_g / norm_factor
+            # pp(audio_g.shape)
             break
     
     # # 找到並顯示第一層參數

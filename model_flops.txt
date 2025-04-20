@@ -3,3 +3,232 @@ aten::conv2d        0             0  461935104              0     280640002
     aten::mm        0             0 5235965952     5235965952     178841190
    aten::add        0             0  578150400      578150400        144537
    aten::mul       80            56    3783680        3783680           756
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------- Calculate Flops Results -------------------------------------
+Notations:
+number of parameters (Params), number of multiply-accumulate operations(MACs),
+number of floating-point operations (FLOPs), floating-point operations per second (FLOPS),
+fwd FLOPs (model forward propagation FLOPs), bwd FLOPs (model backward propagation FLOPs),
+default model backpropagation takes 2.00 times as much computation as forward propagation.
+
+Total Training Params:                                                  2.26 M  
+fwd MACs:                                                               187.34 GMACs
+fwd FLOPs:                                                              375.62 GFLOPS
+fwd+bwd MACs:                                                           562.03 GMACs
+fwd+bwd FLOPs:                                                          1.13 TFLOPS
+
+-------------------------------- Detailed Calculated FLOPs Results --------------------------------
+Each module caculated is listed after its name in the following order: 
+params, percentage of total params, MACs, percentage of total MACs, FLOPS, percentage of total FLOPs
+
+Note: 1. A module can have torch.nn.module or torch.nn.functional to compute logits (e.g. CrossEntropyLoss). 
+ They are not counted as submodules in calflops and not to be printed out. However they make up the difference between a parent's MACs and the sum of its submodules'.
+2. Number of floating-point operations is a theoretical estimation, thus FLOPS computed using that could be larger than the maximum system throughput.
+
+SEMamba(
+  2.26 M = 100% Params, 187.34 GMACs = 100% MACs, 375.62 GFLOPS = 100% FLOPs
+  (dense_encoder): DenseEncoder(
+    382.59 K = 16.94% Params, 70.91 GMACs = 37.85% MACs, 142.28 GFLOPS = 37.88% FLOPs
+    (dense_conv_1): Sequential(
+      384 = 0.02% Params, 24.21 MMACs = 0.01% MACs, 133.16 MFLOPS = 0.04% FLOPs
+      (0): Conv2d(192 = 0.01% Params, 24.21 MMACs = 0.01% MACs, 60.53 MFLOPS = 0.02% FLOPs, 2, 64, kernel_size=(1, 1), stride=(1, 1))
+      (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 60.53 MFLOPS = 0.02% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+      (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 12.11 MFLOPS = 0% FLOPs, num_parameters=64)
+    )
+    (dense_block): DenseBlock(
+      369.66 K = 16.37% Params, 69.72 GMACs = 37.22% MACs, 139.79 GFLOPS = 37.22% FLOPs
+      (dense_block): ModuleList(
+        (0): Sequential(
+          37.12 K = 1.64% Params, 6.97 GMACs = 3.72% MACs, 14.03 GFLOPS = 3.74% FLOPs
+          (0): Conv2d(36.93 K = 1.63% Params, 6.97 GMACs = 3.72% MACs, 13.96 GFLOPS = 3.72% FLOPs, 64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 60.53 MFLOPS = 0.02% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 12.11 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (1): Sequential(
+          73.98 K = 3.28% Params, 13.94 GMACs = 7.44% MACs, 27.97 GFLOPS = 7.45% FLOPs
+          (0): Conv2d(73.79 K = 3.27% Params, 13.94 GMACs = 7.44% MACs, 27.9 GFLOPS = 7.43% FLOPs, 128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(2, 1), dilation=(2, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 60.53 MFLOPS = 0.02% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 12.11 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (2): Sequential(
+          110.85 K = 4.91% Params, 20.92 GMACs = 11.17% MACs, 41.92 GFLOPS = 11.16% FLOPs
+          (0): Conv2d(110.66 K = 4.9% Params, 20.92 GMACs = 11.17% MACs, 41.85 GFLOPS = 11.14% FLOPs, 192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(4, 1), dilation=(4, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 60.53 MFLOPS = 0.02% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 12.11 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (3): Sequential(
+          147.71 K = 6.54% Params, 27.89 GMACs = 14.89% MACs, 55.86 GFLOPS = 14.87% FLOPs
+          (0): Conv2d(147.52 K = 6.53% Params, 27.89 GMACs = 14.89% MACs, 55.79 GFLOPS = 14.85% FLOPs, 256, 64, kernel_size=(3, 3), stride=(1, 1), padding=(8, 1), dilation=(8, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 60.53 MFLOPS = 0.02% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 12.11 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+      )
+    )
+    (dense_conv_2): Sequential(
+      12.54 K = 0.56% Params, 1.16 GMACs = 0.62% MACs, 2.35 GFLOPS = 0.63% FLOPs
+      (0): Conv2d(12.35 K = 0.55% Params, 1.16 GMACs = 0.62% MACs, 2.32 GFLOPS = 0.62% FLOPs, 64, 64, kernel_size=(1, 3), stride=(1, 2))
+      (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+      (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+    )
+  )
+  (TSMamba): ModuleList(
+    (0-3): 4 x TFMambaBlock(
+      277.89 K = 12.3% Params, 11.18 GMACs = 5.97% MACs, 22.37 GFLOPS = 5.95% FLOPs
+      (time_mamba): MambaBlock(
+        130.69 K = 5.79% Params, 4.82 GMACs = 2.57% MACs, 9.64 GFLOPS = 2.57% FLOPs
+        (forward_blocks): ModuleList(
+          (0): Block(
+            65.34 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+            (mixer): Mamba(
+              65.28 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+              (in_proj): Linear(32.77 K = 1.45% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=64, out_features=512, bias=False)
+              (conv1d): Conv1d(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, 256, 256, kernel_size=(4,), stride=(1,), padding=(3,), groups=256)
+              (act): SiLU(0 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+              (x_proj): Linear(9.22 K = 0.41% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=36, bias=False)
+              (dt_proj): Linear(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=4, out_features=256, bias=True)
+              (out_proj): Linear(16.38 K = 0.73% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=64, bias=False)
+            )
+            (norm): RMSNorm(64 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+          )
+        )
+        (backward_blocks): ModuleList(
+          (0): Block(
+            65.34 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+            (mixer): Mamba(
+              65.28 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+              (in_proj): Linear(32.77 K = 1.45% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=64, out_features=512, bias=False)
+              (conv1d): Conv1d(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, 256, 256, kernel_size=(4,), stride=(1,), padding=(3,), groups=256)
+              (act): SiLU(0 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+              (x_proj): Linear(9.22 K = 0.41% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=36, bias=False)
+              (dt_proj): Linear(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=4, out_features=256, bias=True)
+              (out_proj): Linear(16.38 K = 0.73% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=64, bias=False)
+            )
+            (norm): RMSNorm(64 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+          )
+        )
+      )
+      (freq_mamba): MambaBlock(
+        130.69 K = 5.79% Params, 4.82 GMACs = 2.57% MACs, 9.64 GFLOPS = 2.57% FLOPs
+        (forward_blocks): ModuleList(
+          (0): Block(
+            65.34 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+            (mixer): Mamba(
+              65.28 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+              (in_proj): Linear(32.77 K = 1.45% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=64, out_features=512, bias=False)
+              (conv1d): Conv1d(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, 256, 256, kernel_size=(4,), stride=(1,), padding=(3,), groups=256)
+              (act): SiLU(0 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+              (x_proj): Linear(9.22 K = 0.41% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=36, bias=False)
+              (dt_proj): Linear(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=4, out_features=256, bias=True)
+              (out_proj): Linear(16.38 K = 0.73% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=64, bias=False)
+            )
+            (norm): RMSNorm(64 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+          )
+        )
+        (backward_blocks): ModuleList(
+          (0): Block(
+            65.34 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+            (mixer): Mamba(
+              65.28 K = 2.89% Params, 2.41 GMACs = 1.29% MACs, 4.82 GFLOPS = 1.28% FLOPs
+              (in_proj): Linear(32.77 K = 1.45% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=64, out_features=512, bias=False)
+              (conv1d): Conv1d(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, 256, 256, kernel_size=(4,), stride=(1,), padding=(3,), groups=256)
+              (act): SiLU(0 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+              (x_proj): Linear(9.22 K = 0.41% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=36, bias=False)
+              (dt_proj): Linear(1.28 K = 0.06% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=4, out_features=256, bias=True)
+              (out_proj): Linear(16.38 K = 0.73% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs, in_features=256, out_features=64, bias=False)
+            )
+            (norm): RMSNorm(64 = 0% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+          )
+        )
+      )
+      (tlinear): ConvTranspose1d(8.26 K = 0.37% Params, 770.87 MMACs = 0.41% MACs, 1.55 GFLOPS = 0.41% FLOPs, 128, 64, kernel_size=(1,), stride=(1,))
+      (flinear): ConvTranspose1d(8.26 K = 0.37% Params, 770.87 MMACs = 0.41% MACs, 1.55 GFLOPS = 0.41% FLOPs, 128, 64, kernel_size=(1,), stride=(1,))
+    )
+  )
+  (mask_decoder): MagDecoder(
+    382.29 K = 16.92% Params, 35.86 GMACs = 19.14% MACs, 71.89 GFLOPS = 19.14% FLOPs
+    (dense_block): DenseBlock(
+      369.66 K = 16.37% Params, 34.69 GMACs = 18.52% MACs, 69.55 GFLOPS = 18.52% FLOPs
+      (dense_block): ModuleList(
+        (0): Sequential(
+          37.12 K = 1.64% Params, 3.47 GMACs = 1.85% MACs, 6.98 GFLOPS = 1.86% FLOPs
+          (0): Conv2d(36.93 K = 1.63% Params, 3.47 GMACs = 1.85% MACs, 6.94 GFLOPS = 1.85% FLOPs, 64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (1): Sequential(
+          73.98 K = 3.28% Params, 6.94 GMACs = 3.7% MACs, 13.92 GFLOPS = 3.71% FLOPs
+          (0): Conv2d(73.79 K = 3.27% Params, 6.94 GMACs = 3.7% MACs, 13.88 GFLOPS = 3.7% FLOPs, 128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(2, 1), dilation=(2, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (2): Sequential(
+          110.85 K = 4.91% Params, 10.41 GMACs = 5.55% MACs, 20.86 GFLOPS = 5.55% FLOPs
+          (0): Conv2d(110.66 K = 4.9% Params, 10.41 GMACs = 5.55% MACs, 20.82 GFLOPS = 5.54% FLOPs, 192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(4, 1), dilation=(4, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (3): Sequential(
+          147.71 K = 6.54% Params, 13.88 GMACs = 7.41% MACs, 27.79 GFLOPS = 7.4% FLOPs
+          (0): Conv2d(147.52 K = 6.53% Params, 13.88 GMACs = 7.41% MACs, 27.76 GFLOPS = 7.39% FLOPs, 256, 64, kernel_size=(3, 3), stride=(1, 1), padding=(8, 1), dilation=(8, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+      )
+    )
+    (mask_conv): Sequential(
+      12.42 K = 0.55% Params, 1.17 GMACs = 0.62% MACs, 2.34 GFLOPS = 0.62% FLOPs
+      (0): ConvTranspose2d(12.35 K = 0.55% Params, 1.16 GMACs = 0.62% MACs, 2.32 GFLOPS = 0.62% FLOPs, 64, 64, kernel_size=(1, 3), stride=(1, 2))
+      (1): Conv2d(65 = 0% Params, 12.11 MMACs = 0.01% MACs, 24.4 MFLOPS = 0.01% FLOPs, 64, 1, kernel_size=(1, 1), stride=(1, 1))
+      (2): InstanceNorm2d(2 = 0% Params, 0 MACs = 0% MACs, 945.71 KFLOPS = 0% FLOPs, 1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+      (3): PReLU(1 = 0% Params, 0 MACs = 0% MACs, 189.14 KFLOPS = 0% FLOPs, num_parameters=1)
+      (4): Conv2d(2 = 0% Params, 189.14 KMACs = 0% MACs, 567.42 KFLOPS = 0% FLOPs, 1, 1, kernel_size=(1, 1), stride=(1, 1))
+    )
+    (lsigmoid): LearnableSigmoid2D(201 = 0.01% Params, 0 MACs = 0% MACs, 0 FLOPS = 0% FLOPs)
+  )
+  (phase_decoder): PhaseDecoder(
+    382.34 K = 16.93% Params, 35.87 GMACs = 19.15% MACs, 71.98 GFLOPS = 19.16% FLOPs
+    (dense_block): DenseBlock(
+      369.66 K = 16.37% Params, 34.69 GMACs = 18.52% MACs, 69.55 GFLOPS = 18.52% FLOPs
+      (dense_block): ModuleList(
+        (0): Sequential(
+          37.12 K = 1.64% Params, 3.47 GMACs = 1.85% MACs, 6.98 GFLOPS = 1.86% FLOPs
+          (0): Conv2d(36.93 K = 1.63% Params, 3.47 GMACs = 1.85% MACs, 6.94 GFLOPS = 1.85% FLOPs, 64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (1): Sequential(
+          73.98 K = 3.28% Params, 6.94 GMACs = 3.7% MACs, 13.92 GFLOPS = 3.71% FLOPs
+          (0): Conv2d(73.79 K = 3.27% Params, 6.94 GMACs = 3.7% MACs, 13.88 GFLOPS = 3.7% FLOPs, 128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(2, 1), dilation=(2, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (2): Sequential(
+          110.85 K = 4.91% Params, 10.41 GMACs = 5.55% MACs, 20.86 GFLOPS = 5.55% FLOPs
+          (0): Conv2d(110.66 K = 4.9% Params, 10.41 GMACs = 5.55% MACs, 20.82 GFLOPS = 5.54% FLOPs, 192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(4, 1), dilation=(4, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+        (3): Sequential(
+          147.71 K = 6.54% Params, 13.88 GMACs = 7.41% MACs, 27.79 GFLOPS = 7.4% FLOPs
+          (0): Conv2d(147.52 K = 6.53% Params, 13.88 GMACs = 7.41% MACs, 27.76 GFLOPS = 7.39% FLOPs, 256, 64, kernel_size=(3, 3), stride=(1, 1), padding=(8, 1), dilation=(8, 1))
+          (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 30.11 MFLOPS = 0.01% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+          (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 6.02 MFLOPS = 0% FLOPs, num_parameters=64)
+        )
+      )
+    )
+    (phase_conv): Sequential(
+      12.54 K = 0.56% Params, 1.16 GMACs = 0.62% MACs, 2.39 GFLOPS = 0.64% FLOPs
+      (0): ConvTranspose2d(12.35 K = 0.55% Params, 1.16 GMACs = 0.62% MACs, 2.32 GFLOPS = 0.62% FLOPs, 64, 64, kernel_size=(1, 3), stride=(1, 2))
+      (1): InstanceNorm2d(128 = 0.01% Params, 0 MACs = 0% MACs, 60.53 MFLOPS = 0.02% FLOPs, 64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False)
+      (2): PReLU(64 = 0% Params, 0 MACs = 0% MACs, 12.11 MFLOPS = 0% FLOPs, num_parameters=64)
+    )
+    (phase_conv_r): Conv2d(65 = 0% Params, 12.11 MMACs = 0.01% MACs, 24.4 MFLOPS = 0.01% FLOPs, 64, 1, kernel_size=(1, 1), stride=(1, 1))
+    (phase_conv_i): Conv2d(65 = 0% Params, 12.11 MMACs = 0.01% MACs, 24.4 MFLOPS = 0.01% FLOPs, 64, 1, kernel_size=(1, 1), stride=(1, 1))
+  )
+)
+---------------------------------------------------------------------------------------------------
+Total FLOPs for p226_018.wav: 375.62 GFLOPS
+Total Params: 2.26 M
+Total MACs: 187.34 GMACs
