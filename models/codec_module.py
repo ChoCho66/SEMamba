@@ -36,14 +36,15 @@ class DenseBlock(nn.Module):
     """
     DenseBlock module consisting of multiple convolutional layers with dilation.
     """
-    def __init__(self, cfg, kernel_size=(3, 3), depth=4):
+    # def __init__(self, cfg, kernel_size=(3, 3), depth=4):
+    def __init__(self, cfg, kernel_size=(3, 3)):
         super(DenseBlock, self).__init__()
         self.cfg = cfg
-        self.depth = depth
+        self.depth = cfg['model_cfg']['depth'] or 4
         self.dense_block = nn.ModuleList()
         self.hid_feature = cfg['model_cfg']['hid_feature']
 
-        for i in range(depth):
+        for i in range(self.depth):
             dil = 2 ** i
             dense_conv = nn.Sequential(
                 nn.Conv2d(self.hid_feature * (i + 1), self.hid_feature, kernel_size, 
@@ -85,7 +86,7 @@ class DenseEncoder(nn.Module):
             nn.PReLU(self.hid_feature)
         )
 
-        self.dense_block = DenseBlock(cfg, depth=4)
+        self.dense_block = DenseBlock(cfg)
 
         self.dense_conv_2 = nn.Sequential(
             nn.Conv2d(self.hid_feature, self.hid_feature, (1, 3), stride=(1, 2)),
@@ -114,7 +115,8 @@ class MagDecoder(nn.Module):
     """
     def __init__(self, cfg):
         super(MagDecoder, self).__init__()
-        self.dense_block = DenseBlock(cfg, depth=4)
+        # self.dense_block = DenseBlock(cfg, depth=4)
+        self.dense_block = DenseBlock(cfg)
         self.hid_feature = cfg['model_cfg']['hid_feature']
         self.output_channel = cfg['model_cfg']['output_channel']
         self.n_fft = cfg['stft_cfg']['n_fft']
@@ -152,7 +154,7 @@ class PhaseDecoder(nn.Module):
     """
     def __init__(self, cfg):
         super(PhaseDecoder, self).__init__()
-        self.dense_block = DenseBlock(cfg, depth=4)
+        self.dense_block = DenseBlock(cfg)
         self.hid_feature = cfg['model_cfg']['hid_feature']
         self.output_channel = cfg['model_cfg']['output_channel']
 

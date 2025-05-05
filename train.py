@@ -49,7 +49,77 @@ def setup_schedulers(optimizers, cfg, last_epoch):
 
     return scheduler_g, scheduler_d
 
+from pathlib import Path
+def load_json_files(json_paths):
+    """Load and merge multiple JSON files."""
+    merged_data = []
+    for json_path in json_paths:
+        json_path = Path(json_path)  # 確保路徑正確處理
+        if json_path.exists():
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    merged_data.extend(data)  # 假設 JSON 內容是列表，直接合併
+                else:
+                    merged_data.append(data)  # 如果是其他格式，根據需要處理
+        else:
+            print(f"Warning: JSON file {json_path} not found.")
+    return merged_data
+
+import tempfile
 def create_dataset(cfg, train=True, split=True, device='cuda:0'):
+    """Create dataset based on configuration."""
+    # 根據 train 選擇對應的 JSON 檔案列表
+    clean_json_paths = cfg['data_cfg']['train_clean_json'] if train else cfg['data_cfg']['valid_clean_json']
+    noisy_json_paths = cfg['data_cfg']['train_noisy_json'] if train else cfg['data_cfg']['valid_noisy_json']
+    
+    # 確保輸入是列表，如果是單個檔案，轉為單元素列表
+    if isinstance(clean_json_paths, str):
+        clean_json_paths = [clean_json_paths]
+    if isinstance(noisy_json_paths, str):
+        noisy_json_paths = [noisy_json_paths]
+    
+    # 讀取並合併 JSON 檔案內容
+    clean_data = load_json_files(clean_json_paths)
+    noisy_data = load_json_files(noisy_json_paths)
+    
+    # 創建臨時檔案並寫入合併後的數據
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_clean_file:
+        json.dump(clean_data, temp_clean_file)
+        temp_clean_path = temp_clean_file.name
+    
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_noisy_file:
+        json.dump(noisy_data, temp_noisy_file)
+        temp_noisy_path = temp_noisy_file.name
+    
+    # 假設 VCTKDemandDataset 需要檔案路徑，這裡傳入合併後的數據
+    # 如果 VCTKDemandDataset 直接接受檔案路徑，則需要將 clean_data, noisy_data 寫入臨時 JSON 檔案
+    shuffle = (cfg['env_setting']['num_gpus'] <= 1) if train else False
+    pcs = cfg['training_cfg']['use_PCS400'] if train else False
+    
+    ds = VCTKDemandDataset(
+        clean_json=temp_clean_path,  # 傳入合併後的數據
+        noisy_json=temp_noisy_path,  # 傳入合併後的數據
+        sampling_rate=cfg['stft_cfg']['sampling_rate'],
+        segment_size=cfg['training_cfg']['segment_size'],
+        n_fft=cfg['stft_cfg']['n_fft'],
+        hop_size=cfg['stft_cfg']['hop_size'],
+        win_size=cfg['stft_cfg']['win_size'],
+        compress_factor=cfg['model_cfg']['compress_factor'],
+        split=split,
+        n_cache_reuse=0,
+        shuffle=shuffle,
+        device=device,
+        pcs=pcs
+    )
+    
+    # 可選：清理臨時檔案（視需求決定是否立即刪除）
+    # os.unlink(temp_clean_path)
+    # os.unlink(temp_noisy_path)
+    
+    return ds
+    
+def create_dataset_origin(cfg, train=True, split=True, device='cuda:0'):
     """Create dataset based on cfguration."""
     clean_json = cfg['data_cfg']['train_clean_json'] if train else cfg['data_cfg']['valid_clean_json']
     noisy_json = cfg['data_cfg']['train_noisy_json'] if train else cfg['data_cfg']['valid_noisy_json']
@@ -162,8 +232,8 @@ def train(rank, args, cfg):
 
             audio_g = mag_phase_istft(mag_g, pha_g, n_fft, hop_size, win_size, compress_factor)
             
-            pps(clean_audio, audio_g)
-            print(no)
+            # pps(clean_audio, audio_g)
+            # exit()
             
             audio_list_r, audio_list_g = list(clean_audio.cpu().numpy()), list(audio_g.detach().cpu().numpy())
             batch_pesq_score = batch_pesq(audio_list_r, audio_list_g, cfg)
@@ -237,8 +307,8 @@ def train(rank, args, cfg):
                             'Steps : {:d}, Gen Loss: {:4.3f}, Disc Loss: {:4.3f}, Metric Loss: {:4.3f}, '
                             'Mag Loss: {:4.3f}, Pha Loss: {:4.3f}, Com Loss: {:4.3f}, Time Loss: {:4.3f}, Cons Loss: {:4.3f}, s/b : {:4.3f}'.format(
                                 steps, loss_gen_all, loss_disc_all, metric_error, mag_error, pha_error, com_error, time_error, con_error, time.time() - start_b
+                                )
                             )
-                        )
 
                 # Checkpointing
                 if steps % cfg['env_setting']['checkpoint_interval'] == 0 and steps != 0:

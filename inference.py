@@ -296,7 +296,7 @@ def show_model2(args, device):
     print(111)
     print(model.TSMamba[0].time_mamba.forward_blocks[0].mixer.A_log)
     print(222)
-    print(nnn)
+    exit()
 
 
 def main():
@@ -308,6 +308,7 @@ def main():
     # parser.add_argument('--checkpoint_file', required=True)
     parser.add_argument('--checkpoint_file', default='/disk4/chocho/SEMamba/ckpts/SEMamba_advanced.pth')
     parser.add_argument('--post_processing_PCS', default=False)
+    # parser.add_argument('--mode', default="check")
     args = parser.parse_args()
 
     global device
@@ -317,9 +318,11 @@ def main():
         #device = torch.device('cpu')
         raise RuntimeError("Currently, CPU mode is not supported.")
 
-    # inference(args, device)
+    # if args.mode == "inference":
+    inference(args, device)
     # inference_feature_map(args, device)
-    inference_FlopCountAnalysis(args, device)
+    # if args.mode == "FlopCountAnalysis":
+        # inference_FlopCountAnalysis(args, device)
     # inference_chunk(args, device)
     # show_model(args, device)
     # show_model2(args, device)
