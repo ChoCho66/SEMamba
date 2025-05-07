@@ -14,6 +14,8 @@ D_CONV=$(yq eval '.model_cfg.d_conv' $CONFIG_FILE)
 EXPAND=$(yq eval '.model_cfg.expand' $CONFIG_FILE)
 DEPTH=$(yq eval '.model_cfg.depth' $CONFIG_FILE)
 
+DATA_TYPE=$(yq eval '.data_cfg.data_type' $CONFIG_FILE)
+
 # 檢查是否成功提取參數
 if [[ -z "$HID_FEATURE" ]]; then
     echo "Error: Failed to extract hid_feature from $CONFIG_FILE"
@@ -31,5 +33,6 @@ EXP_NAME="${EXP_NAME_SUFFIX}"
 # 執行訓練
 taskset -c 44-47 nice -n 46 python train.py \
   --config $CONFIG_FILE \
-  --exp_folder 'exp/VCTK+THCHS/' \
-  --exp_name "$EXP_NAME"
+  --exp_name "$EXP_NAME" \
+  --exp_folder "exp/$DATA_TYPE/" \
+  # --exp_folder 'exp/VCTK+THCHS/' \

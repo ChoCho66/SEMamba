@@ -8,3 +8,5 @@ _test*
 exp*
 exp*
 results*
+
+_202505/cal_model_size/*.pth
