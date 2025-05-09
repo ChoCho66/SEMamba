@@ -31,7 +31,7 @@ CURRENT_DATE=$(date +%Y%m%d)
 EXP_NAME="${EXP_NAME_SUFFIX}"
 
 # 執行訓練
-taskset -c 44-47 nice -n 46 python train.py \
+taskset -c 40-47 nice -n 46 python train.py \
   --config $CONFIG_FILE \
   --exp_name "$EXP_NAME" \
   --exp_folder "exp/$DATA_TYPE/" \

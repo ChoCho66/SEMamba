@@ -186,6 +186,7 @@ def train(rank, args, cfg):
         generator.load_state_dict(state_dict_g['generator'], strict=False)
         discriminator.load_state_dict(state_dict_do['discriminator'], strict=False)
 
+    # gpu > 1 時的 generator and discriminator
     if num_gpus > 1 and torch.cuda.is_available():
         generator = DistributedDataParallel(generator, device_ids=[rank]).to(device)
         discriminator = DistributedDataParallel(discriminator, device_ids=[rank]).to(device)
@@ -228,6 +229,8 @@ def train(rank, args, cfg):
             noisy_pha = torch.autograd.Variable(noisy_pha.to(device, non_blocking=True))
             one_labels = torch.ones(batch_size).to(device, non_blocking=True)
 
+            # noisy_mag, noisy_pha: 
+            # [B,2,T,F] = [B, 2, len_wav//hop_size, n_fft//2+1]
             mag_g, pha_g, com_g = generator(noisy_mag, noisy_pha)
 
             audio_g = mag_phase_istft(mag_g, pha_g, n_fft, hop_size, win_size, compress_factor)
@@ -261,6 +264,7 @@ def train(rank, args, cfg):
             # ------------------------------------------------------- #
             optim_g.zero_grad()
 
+            # 各種 loss
             # Reference: https://github.com/yxlu-0102/MP-SENet/blob/main/train.py
             # L2 Magnitude Loss
             loss_mag = F.mse_loss(clean_mag, mag_g)

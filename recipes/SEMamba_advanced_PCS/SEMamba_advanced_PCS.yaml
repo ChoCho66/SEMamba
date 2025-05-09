@@ -17,7 +17,8 @@ env_setting:
 
 # Datapath Configuratoin
 data_cfg:
-  data_type: VCTK
+  data_type: VCTK-400
+  # data_type: VCTK
   train_clean_json: data/train_clean.json
   train_noisy_json: data/train_noisy.json
   valid_clean_json: data/valid_clean.json
@@ -45,9 +46,11 @@ data_cfg1:
 training_cfg:
   training_epochs: 200 # Training epoch.
   # batch_size: 4  # Training batch size.
+  batch_size: 12  # Training batch size.
   # batch_size: 32  # Training batch size.
   # batch_size: 26  # Training batch size.   dep2_h64_tf2_ds16_dc3_ex2
-  batch_size: 20  # dep4_h32_tf4_ds16_dc3_ex4
+  # batch_size: 20  # dep4_h32_tf4_ds16_dc3_ex4
+  # batch_size: 16  # dep4_h32_tf4_ds32_dc3_ex4
   # batch_size: 64  # Training batch size.
   learning_rate: 0.0005  # Initial learning rate.
   adam_b1: 0.8  # Beta1 hyperparameter for the AdamW optimizer.
@@ -67,24 +70,24 @@ training_cfg:
 # Configuration for Short-Time Fourier Transform (STFT), crucial for audio processing models.
 stft_cfg:
   sampling_rate: 16000  # Audio sampling rate in Hz.
-  # n_fft: 400  # FFT components for transforming audio signals.
-  n_fft: 512  # FFT components for transforming audio signals.
+  n_fft: 400  # FFT components for transforming audio signals.
+  # n_fft: 512  # FFT components for transforming audio signals.
   hop_size: 100  # Samples between successive frames.
   win_size: 400  # Window size used in FFT.
 
 # Model Configuration
 # Defines the architecture specifics of the model, including layer configurations and feature compression.
 model_cfg:
-  depth: 3 # depth of class DenseBlock
-  # hid_feature: 64  # Channels in dense layers.
-  hid_feature: 32  # Channels in dense layers.
+  depth: 4 # depth of class DenseBlock
+  hid_feature: 64  # Channels in dense layers.
+  # hid_feature: 32  # Channels in dense layers.
   # hid_feature: 16  # Channels in dense layers.
   compress_factor: 0.3  # Compression factor applied to extracted features.
   num_tfmamba: 4  # Number of Time-Frequency Mamba (TFMamba) blocks in the model.
-  # num_tfmamba: 2  # Number of Time-Frequency Mamba (TFMamba) blocks in the model.
-  # d_state: 16  # Dimensionality of the state vector in Mamba blocks.
-  d_state: 32  # Dimensionality of the state vector in Mamba blocks.
-  d_conv: 3  # Convolutional layer dimensionality within Mamba blocks.
+  # num_tfmamba: 1  # Number of Time-Frequency Mamba (TFMamba) blocks in the model.
+  d_state: 16  # Dimensionality of the state vector in Mamba blocks.
+  # d_state: 32  # Dimensionality of the state vector in Mamba blocks.
+  d_conv: 4  # Convolutional layer dimensionality within Mamba blocks.
   expand: 4  # Expansion factor for the layers within the Mamba blocks.
   # expand: 2  # Expansion factor for the layers within the Mamba blocks.
   norm_epsilon: 0.00001  # Numerical stability in normalization layers within the Mamba blocks.

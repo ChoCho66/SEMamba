@@ -99,6 +99,7 @@ class TFMambaBlock(nn.Module):
         Returns:
         Tensor: Output tensor after applying temporal and frequency Mamba blocks.
         """
+        # SEMamba 中, x 會是 [B, hid, T, F]
         b, c, t, f = x.size()
 
         x = x.permute(0, 3, 2, 1).contiguous().view(b*f, t, c)
@@ -108,3 +109,27 @@ class TFMambaBlock(nn.Module):
         x = x.view(b, t, f, c).permute(0, 3, 1, 2)
         return x
 
+    def forward1(self, x):
+        b, c, t, f = x.size()
+        
+        # Time Mamba
+        x_time = x.permute(0, 3, 2, 1).contiguous().view(b * f, t, c)  # [B*F, T, C]
+        time_mamba_input = x_time  # Save input
+        time_mamba_output = self.time_mamba(x_time)  # [B*F, T, C]
+        x = self.tlinear(time_mamba_output.permute(0, 2, 1)).permute(0, 2, 1) + x_time
+        x = x.view(b, f, t, c).permute(0, 2, 1, 3)  # [B, T, F, C]
+        
+        # Frequency Mamba
+        x_freq = x.contiguous().view(b * t, f, c)  # [B*T, F, C]
+        freq_mamba_input = x_freq  # Save input
+        freq_mamba_output = self.freq_mamba(x_freq)  # [B*T, F, C]
+        x = self.flinear(freq_mamba_output.permute(0, 2, 1)).permute(0, 2, 1) + x_freq
+        x = x.view(b, t, f, c).permute(0, 3, 1, 2)  # [B, C, T, F]
+        
+        # Return feature maps for visualization
+        return x, {
+            'time_mamba_input': time_mamba_input,
+            'time_mamba_output': time_mamba_output,
+            'freq_mamba_input': freq_mamba_input,
+            'freq_mamba_output': freq_mamba_output
+        }
